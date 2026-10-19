@@ -5,6 +5,7 @@ Output: Parquet files partitioned by year and quarter, each well under GitHub's 
 
     python scripts/prepare_cfpb.py complaints.csv out_dir
 """
+import csv
 import sys
 from pathlib import Path
 
@@ -15,31 +16,39 @@ def main(csv_path: str, out_dir: str) -> None:
     out = Path(out_dir)
     out.mkdir(parents=True, exist_ok=True)
     con = duckdb.connect()
+    with open(csv_path, newline="", encoding="utf-8-sig") as f:
+        header = next(csv.reader(f))
+    print("header", header)
+    norm = {h.strip().lower(): h for h in header}
+
+    def col(name: str) -> str:
+        return '"' + norm[name.lower()].replace('"', '""') + '"'
+
     con.execute(f"""
         CREATE TABLE cc AS
         SELECT
-            CAST("Complaint ID" AS BIGINT)                 AS complaint_id,
-            CAST("Date received" AS DATE)                  AS date_received,
-            CAST("Date sent to company" AS DATE)           AS date_sent,
-            "Product"                                      AS product,
-            "Sub-product"                                  AS sub_product,
-            "Issue"                                        AS issue,
-            "Sub-issue"                                    AS sub_issue,
-            "Consumer complaint narrative"                 AS narrative,
-            "Company public response"                      AS company_public_response,
-            "Company"                                      AS company,
-            "State"                                        AS state,
-            "ZIP code"                                     AS zip,
-            "Tags"                                         AS tags,
-            "Submitted via"                                AS submitted_via,
-            "Company response to consumer"                 AS company_response,
-            "Timely response?"                             AS timely,
-            "Consumer disputed?"                           AS disputed
+            CAST({col("Complaint ID")} AS BIGINT)                 AS complaint_id,
+            CAST({col("Date received")} AS DATE)                  AS date_received,
+            CAST({col("Date sent to company")} AS DATE)           AS date_sent,
+            {col("Product")}                                      AS product,
+            {col("Sub-product")}                                  AS sub_product,
+            {col("Issue")}                                        AS issue,
+            {col("Sub-issue")}                                    AS sub_issue,
+            {col("Consumer complaint narrative")}                 AS narrative,
+            {col("Company public response")}                      AS company_public_response,
+            {col("Company")}                                      AS company,
+            {col("State")}                                        AS state,
+            {col("ZIP code")}                                     AS zip,
+            {col("Tags")}                                         AS tags,
+            {col("Submitted via")}                                AS submitted_via,
+            {col("Company response to consumer")}                 AS company_response,
+            {col("Timely response?")}                             AS timely,
+            {col("Consumer disputed?")}                           AS disputed
         FROM read_csv('{csv_path}', header = true, all_varchar = true, quote = '"', escape = '"',
                       max_line_size = 10000000)
-        WHERE "Product" ILIKE '%credit card%'
-          AND "Consumer complaint narrative" IS NOT NULL
-          AND length("Consumer complaint narrative") > 0
+        WHERE {col("Product")} ILIKE '%credit card%'
+          AND {col("Consumer complaint narrative")} IS NOT NULL
+          AND length({col("Consumer complaint narrative")}) > 0
     """)
     con.execute(f"""
         COPY (SELECT *, year(date_received) AS year, quarter(date_received) AS q FROM cc)

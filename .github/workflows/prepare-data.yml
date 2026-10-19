@@ -23,7 +23,10 @@ jobs:
           curl -fL --retry 3 -o complaints.csv.zip https://files.consumerfinance.gov/ccdb/complaints.csv.zip
           unzip -o complaints.csv.zip && rm complaints.csv.zip && ls -l complaints.csv
       - name: Filter to credit-card complaints with narratives
-        run: python scripts/prepare_cfpb.py complaints.csv out/cfpb 2>&1 | tee prep.log
+        run: |
+          set -o pipefail
+          head -c 600 complaints.csv
+          python scripts/prepare_cfpb.py complaints.csv out/cfpb 2>&1 | tee prep.log
       - name: Download embedding model (all-MiniLM-L6-v2, Apache-2.0)
         run: |
           python - <<'PY'
@@ -49,4 +52,4 @@ jobs:
       - name: Summary
         if: always()
         run: |
-          while IFS= read -r line; do echo "::notice title=prep::$line"; done < <(grep -E "^(year|products|responses|top|files)" prep.log | cut -c1-3000)
+          while IFS= read -r line; do echo "::notice title=prep::$line"; done < <(grep -E "^(header|years|products|responses|top|files|Traceback|[A-Za-z_.]*(Error|Exception))" prep.log | cut -c1-3000)
