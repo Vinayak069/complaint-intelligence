@@ -1,0 +1,52 @@
+name: Prepare data
+# Downloads the public CFPB complaint database and a small open sentence-embedding model, and
+# publishes them on the `data` branch so the analysis can run anywhere without re-downloading
+# several GB. Started by hand from the Actions tab.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  prepare:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install duckdb==1.5.6 huggingface_hub
+      - name: Download CFPB complaints
+        run: |
+          curl -fL --retry 3 -o complaints.csv.zip https://files.consumerfinance.gov/ccdb/complaints.csv.zip
+          unzip -o complaints.csv.zip && rm complaints.csv.zip && ls -l complaints.csv
+      - name: Filter to credit-card complaints with narratives
+        run: python scripts/prepare_cfpb.py complaints.csv out/cfpb 2>&1 | tee prep.log
+      - name: Download embedding model (all-MiniLM-L6-v2, Apache-2.0)
+        run: |
+          python - <<'PY'
+          from huggingface_hub import snapshot_download
+          snapshot_download("sentence-transformers/all-MiniLM-L6-v2", local_dir="out/models/all-MiniLM-L6-v2",
+                            allow_patterns=["*.json", "*.txt", "model.safetensors", "1_Pooling/*", "modules.json"])
+          PY
+          du -sh out/*
+      - name: Publish to the data branch
+        run: |
+          cp prep.log out/
+          cat > out/README.md <<'MD'
+          Data for complaint-intelligence, produced by the Prepare data workflow.
+          - cfpb/: CFPB Consumer Complaint Database (public domain, consumerfinance.gov), credit-card complaints with a consumer narrative, partitioned by year and quarter.
+          - models/all-MiniLM-L6-v2/: sentence-transformers/all-MiniLM-L6-v2 (Apache-2.0).
+          MD
+          cd out
+          git init -q -b data
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A && git commit -q -m "Data snapshot $(date -u +%Y-%m-%d)"
+          git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" data
+      - name: Summary
+        if: always()
+        run: |
+          while IFS= read -r line; do echo "::notice title=prep::$line"; done < <(grep -E "^(year|products|responses|top|files)" prep.log | cut -c1-3000)
