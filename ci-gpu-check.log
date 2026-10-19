@@ -1,0 +1,11 @@
+[{"stream_name":"stdout","time":0.84102467,"data":"+ git clone -q --depth 1 -b main https://github.com/Vinayak069/complaint-intelligence /kaggle/tmp/repo\n"}
+,{"stream_name":"stdout","time":1.571533703,"data":"+ git clone -q --depth 1 -b data https://github.com/Vinayak069/complaint-intelligence /kaggle/tmp/repo/data\n"}
+,{"stream_name":"stdout","time":7.268505115,"data":"+ pip install -q -e /kaggle/tmp/repo[nlp] 2\u003e\u00261 | tail -2\n"}
+,{"stream_name":"stdout","time":28.675898341,"data":"{'cuda': True, 'gpus': ['Tesla T4', 'Tesla T4'], 'parquet_files': 47}\n"}
+,{"stream_name":"stderr","time":34.88736841,"data":"/usr/local/lib/python3.13/dist-packages/mistune.py:435: SyntaxWarning: invalid escape sequence '\\|'\n"}
+,{"stream_name":"stderr","time":34.887405456,"data":"  cells[i][c] = re.sub('\\\\\\\\\\|', '|', cell)\n"}
+,{"stream_name":"stderr","time":35.230894847,"data":"/usr/local/lib/python3.13/dist-packages/nbconvert/filters/filter_links.py:36: SyntaxWarning: invalid escape sequence '\\_'\n"}
+,{"stream_name":"stderr","time":35.230925348,"data":"  text = re.sub(r'_', '\\_', text) # Escape underscores in display text\n"}
+,{"stream_name":"stderr","time":36.080861576,"data":"[NbConvertApp] Converting notebook __script__.ipynb to html\n"}
+,{"stream_name":"stderr","time":37.280764596,"data":"[NbConvertApp] Writing 276388 bytes to __results__.html\n"}
+]

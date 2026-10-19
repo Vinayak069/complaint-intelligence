@@ -1,0 +1,1 @@
+{"cuda": true, "gpus": ["Tesla T4", "Tesla T4"], "parquet_files": 47}
