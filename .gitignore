@@ -5,3 +5,6 @@ __pycache__/
 data/
 *.csv
 *.zip
+build/
+*.egg-info/
+__pycache__/
