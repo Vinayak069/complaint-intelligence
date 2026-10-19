@@ -1,0 +1,55 @@
+[{"stream_name":"stdout","time":0.818431954,"data":"+ git clone -q --depth 1 -b main https://github.com/Vinayak069/complaint-intelligence /kaggle/tmp/repo\n"}
+,{"stream_name":"stdout","time":1.5852711529999999,"data":"+ git clone -q --depth 1 -b data https://github.com/Vinayak069/complaint-intelligence /kaggle/tmp/repo/data\n"}
+,{"stream_name":"stdout","time":7.144791817,"data":"+ pip install -q -e /kaggle/tmp/repo[nlp] 2\u003e\u00261 | tail -2\n"}
+,{"stream_name":"stdout","time":81.187204433,"data":"{'gpus': ['Tesla T4', 'Tesla T4'], 'n': {'train': 121148, 'val': 16290, 'test': 55706}}\n"}
+,{"stream_name":"stderr","time":81.671938487,"data":"Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.\n"}
+,{"stream_name":"stderr","time":82.426052353,"data":"[transformers] `torch_dtype` is deprecated! Use `dtype` instead!\n"}
+,{"stream_name":"stderr","time":84.452826923,"data":"\rLoading weights:   0%|          | 0/199 [00:00\u003c?, ?it/s]\rLoading weights:  67%|██████▋   | 133/199 [00:00\u003c00:00, 1267.71it/s]\rLoading weights: 100%|██████████| 199/199 [00:00\u003c00:00, 1407.98it/s]\n"}
+,{"stream_name":"stdout","time":629.074196412,"data":"{'model': 'BAAI/bge-base-en-v1.5', 'k': 20, 'same_queue_at_1': 0.5091372563099128, 'same_queue_precision_at_5': 0.4847951746670018, 'knn_routing_accuracy': 0.5766703766201128, 'knn_relief_auc': 0.6925398259135416, 'mean_top1_similarity': 0.9334747791290283}\n"}
+,{"stream_name":"stderr","time":709.978470134,"data":"\rLoading weights:   0%|          | 0/197 [00:00\u003c?, ?it/s]\rLoading weights: 100%|██████████| 197/197 [00:00\u003c00:00, 2381.90it/s]\n"}
+,{"stream_name":"stderr","time":710.034249651,"data":"[transformers] \u001b[1mRobertaModel LOAD REPORT\u001b[0m from: roberta-base\n"}
+,{"stream_name":"stderr","time":710.034278404,"data":"Key                       | Status     | \n"}
+,{"stream_name":"stderr","time":710.034285178,"data":"--------------------------+------------+-\n"}
+,{"stream_name":"stderr","time":710.034290504,"data":"lm_head.layer_norm.bias   | UNEXPECTED | \n"}
+,{"stream_name":"stderr","time":710.034295828,"data":"lm_head.dense.bias        | UNEXPECTED | \n"}
+,{"stream_name":"stderr","time":710.034300977,"data":"lm_head.layer_norm.weight | UNEXPECTED | \n"}
+,{"stream_name":"stderr","time":710.034306452,"data":"lm_head.bias              | UNEXPECTED | \n"}
+,{"stream_name":"stderr","time":710.034311655,"data":"lm_head.dense.weight      | UNEXPECTED | \n"}
+,{"stream_name":"stderr","time":710.034316909,"data":"pooler.dense.bias         | MISSING    | \n"}
+,{"stream_name":"stderr","time":710.034322184,"data":"pooler.dense.weight       | MISSING    | \n"}
+,{"stream_name":"stderr","time":710.034327384,"data":"\n"}
+,{"stream_name":"stderr","time":710.034332329,"data":"Notes:\n"}
+,{"stream_name":"stderr","time":710.034337509,"data":"- UNEXPECTED:\tcan be ignored when loading from different task/architecture; not ok if you expect identical arch.\n"}
+,{"stream_name":"stderr","time":710.034343277,"data":"- MISSING:\tthose params were newly initialized because missing from the checkpoint. Consider training on your downstream task.\n"}
+,{"stream_name":"stderr","time":710.187702397,"data":"/kaggle/tmp/repo/kaggle/gpu_models.py:125: FutureWarning: `torch.cuda.amp.GradScaler(args...)` is deprecated. Please use `torch.amp.GradScaler('cuda', args...)` instead.\n"}
+,{"stream_name":"stderr","time":710.187729153,"data":"  scaler = torch.cuda.amp.GradScaler()\n"}
+,{"stream_name":"stderr","time":713.107519767,"data":"/kaggle/tmp/repo/kaggle/gpu_models.py:143: UserWarning: Detected call of `lr_scheduler.step()` before `optimizer.step()`. In PyTorch 1.1.0 and later, you should call them in the opposite order: `optimizer.step()` before `lr_scheduler.step()`.  Failure to do this will result in PyTorch skipping the first value of the learning rate schedule. See more details at https://pytorch.org/docs/stable/optim.html#how-to-adjust-learning-rate\n"}
+,{"stream_name":"stderr","time":713.107571725,"data":"  sched.step()\n"}
+,{"stream_name":"stdout","time":817.142567845,"data":"epoch 0 step 200 loss 2.2837 107s\n"}
+,{"stream_name":"stdout","time":920.499186413,"data":"epoch 0 step 400 loss 1.9351 210s\n"}
+,{"stream_name":"stdout","time":1024.697979245,"data":"epoch 0 step 600 loss 1.7956 315s\n"}
+,{"stream_name":"stdout","time":1129.471558191,"data":"epoch 0 step 800 loss 1.7120 419s\n"}
+,{"stream_name":"stdout","time":1233.199164236,"data":"epoch 0 step 1000 loss 1.6568 523s\n"}
+,{"stream_name":"stdout","time":1337.701280998,"data":"epoch 0 step 1200 loss 1.6156 628s\n"}
+,{"stream_name":"stdout","time":1441.835924304,"data":"epoch 0 step 1400 loss 1.5855 732s\n"}
+,{"stream_name":"stdout","time":1546.270127864,"data":"epoch 0 step 1600 loss 1.5608 836s\n"}
+,{"stream_name":"stdout","time":1650.656697657,"data":"epoch 0 step 1800 loss 1.5409 940s\n"}
+,{"stream_name":"stdout","time":1732.442016437,"data":"{'epoch': 0, 'train_loss': 1.5329322406241834, 'val_queue_accuracy': 0.6869858809085329, 'val_relief_auc': 0.7242999190158359, 'seconds': 1022.2531733512878}\n"}
+,{"stream_name":"stdout","time":1836.497174905,"data":"epoch 1 step 200 loss 1.2618 104s\n"}
+,{"stream_name":"stdout","time":1940.091005555,"data":"epoch 1 step 400 loss 1.2671 208s\n"}
+,{"stream_name":"stdout","time":2043.284719685,"data":"epoch 1 step 600 loss 1.2643 311s\n"}
+,{"stream_name":"stdout","time":2147.635787185,"data":"epoch 1 step 800 loss 1.2666 415s\n"}
+,{"stream_name":"stdout","time":2250.483559765,"data":"epoch 1 step 1000 loss 1.2671 518s\n"}
+,{"stream_name":"stdout","time":2354.58263522,"data":"epoch 1 step 1200 loss 1.2687 622s\n"}
+,{"stream_name":"stdout","time":2459.077264192,"data":"epoch 1 step 1400 loss 1.2670 727s\n"}
+,{"stream_name":"stdout","time":2563.496963269,"data":"epoch 1 step 1600 loss 1.2620 831s\n"}
+,{"stream_name":"stdout","time":2667.919829468,"data":"epoch 1 step 1800 loss 1.2593 935s\n"}
+,{"stream_name":"stdout","time":2749.481394123,"data":"{'epoch': 1, 'train_loss': 1.25922007647004, 'val_queue_accuracy': 0.7020257826887661, 'val_relief_auc': 0.7314011512225543, 'seconds': 1017.0307247638702}\n"}
+,{"stream_name":"stdout","time":2900.979073707,"data":"{'routing_test': {'accuracy': 0.6899795354180878, 'macro_f1': 0.6068524099955923, 'per_queue_f1': {'Account closure': 0.6915422885572139, 'Applications': 0.7655407969639468, 'Billing dispute': 0.8785149451958599, 'Card usage': 0.6234375, 'Credit reporting': 0.40923326760236634, 'Escalated investigation': 0.2918552036199095, 'Fees and interest': 0.7472629144178874, 'Other': 0.5245309678938692, 'Payments': 0.5736255286428297, 'Rewards and offers': 0.5629806870620406}, 'top2_accuracy': 0.8626000789861056}, 'relief_test': {'auc': 0.7189903484943245, 'avg_precision': 0.5017108369198846, 'brier': 0.1845493377423222, 'base_rate': 0.2853014037985136, 'relief_captured_top20pct': 0.37557415214245266, 'precision_top20pct': 0.5357687819764833, 'lift_top20pct': 1.8779044717033901}}\n"}
+,{"stream_name":"stderr","time":2909.491367045,"data":"/usr/local/lib/python3.13/dist-packages/mistune.py:435: SyntaxWarning: invalid escape sequence '\\|'\n"}
+,{"stream_name":"stderr","time":2909.491437427,"data":"  cells[i][c] = re.sub('\\\\\\\\\\|', '|', cell)\n"}
+,{"stream_name":"stderr","time":2909.771433234,"data":"/usr/local/lib/python3.13/dist-packages/nbconvert/filters/filter_links.py:36: SyntaxWarning: invalid escape sequence '\\_'\n"}
+,{"stream_name":"stderr","time":2909.771467817,"data":"  text = re.sub(r'_', '\\_', text) # Escape underscores in display text\n"}
+,{"stream_name":"stderr","time":2910.620544228,"data":"[NbConvertApp] Converting notebook __script__.ipynb to html\n"}
+,{"stream_name":"stderr","time":2911.770365934,"data":"[NbConvertApp] Writing 276389 bytes to __results__.html\n"}
+]

@@ -1,0 +1,101 @@
+{
+  "gpus": [
+    "Tesla T4",
+    "Tesla T4"
+  ],
+  "n": {
+    "train": 121148,
+    "val": 16290,
+    "test": 55706
+  },
+  "embedding_seconds": 533.3247797489166,
+  "retrieval": {
+    "model": "BAAI/bge-base-en-v1.5",
+    "k": 20,
+    "same_queue_at_1": 0.5091372563099128,
+    "same_queue_precision_at_5": 0.4847951746670018,
+    "knn_routing_accuracy": 0.5766703766201128,
+    "knn_relief_auc": 0.6925398259135416,
+    "mean_top1_similarity": 0.9334747791290283
+  },
+  "pca_explained_variance": 0.7272341847419739,
+  "finetune_seconds": 2268.8177609443665,
+  "finetune": {
+    "config": {
+      "model": "roberta-base",
+      "epochs": 2,
+      "max_len": 256,
+      "batch_size": 64,
+      "lr": 3e-05,
+      "relief_weight": 1.0
+    },
+    "log": [
+      {
+        "epoch": 0,
+        "train_loss": 1.5329322406241834,
+        "val_queue_accuracy": 0.6869858809085329,
+        "val_relief_auc": 0.7242999190158359,
+        "seconds": 1022.2531733512878
+      },
+      {
+        "epoch": 1,
+        "train_loss": 1.25922007647004,
+        "val_queue_accuracy": 0.7020257826887661,
+        "val_relief_auc": 0.7314011512225543,
+        "seconds": 1017.0307247638702
+      }
+    ],
+    "routing_val": {
+      "accuracy": 0.7020257826887661,
+      "macro_f1": 0.6491573398242844,
+      "per_queue_f1": {
+        "Account closure": 0.6721633294071456,
+        "Applications": 0.7531711374506135,
+        "Billing dispute": 0.8642465273724758,
+        "Card usage": 0.6213460231135283,
+        "Credit reporting": 0.5090579710144928,
+        "Escalated investigation": 0.6028833551769331,
+        "Fees and interest": 0.7601039943275821,
+        "Other": 0.49210174029451137,
+        "Payments": 0.605946556266466,
+        "Rewards and offers": 0.6105527638190955
+      },
+      "top2_accuracy": 0.8568446899938613
+    },
+    "relief_val": {
+      "auc": 0.7314011512225543,
+      "avg_precision": 0.5864055975358984,
+      "brier": 0.1895886895340127,
+      "base_rate": 0.33314917127071825,
+      "relief_captured_top20pct": 0.36963331490694673,
+      "precision_top20pct": 0.6157151626764886,
+      "lift_top20pct": 1.8481665745347335
+    },
+    "routing_test": {
+      "accuracy": 0.6899795354180878,
+      "macro_f1": 0.6068524099955923,
+      "per_queue_f1": {
+        "Account closure": 0.6915422885572139,
+        "Applications": 0.7655407969639468,
+        "Billing dispute": 0.8785149451958599,
+        "Card usage": 0.6234375,
+        "Credit reporting": 0.40923326760236634,
+        "Escalated investigation": 0.2918552036199095,
+        "Fees and interest": 0.7472629144178874,
+        "Other": 0.5245309678938692,
+        "Payments": 0.5736255286428297,
+        "Rewards and offers": 0.5629806870620406
+      },
+      "top2_accuracy": 0.8626000789861056
+    },
+    "relief_test": {
+      "auc": 0.7189903484943245,
+      "avg_precision": 0.5017108369198846,
+      "brier": 0.1845493377423222,
+      "base_rate": 0.2853014037985136,
+      "relief_captured_top20pct": 0.37557415214245266,
+      "precision_top20pct": 0.5357687819764833,
+      "lift_top20pct": 1.8779044717033901
+    }
+  }
+}
