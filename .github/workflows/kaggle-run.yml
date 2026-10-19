@@ -1,0 +1,87 @@
+name: Kaggle run
+# Runs kaggle/<job>.py on a Kaggle GPU session (the repo owner's account, via the KAGGLE_* secrets),
+# waits for it, and publishes its outputs to the kaggle-out/<job> branch.
+on:
+  workflow_dispatch:
+    inputs:
+      job:
+        description: Script name under kaggle/ (without .py)
+        required: true
+      gpu:
+        description: Use a GPU
+        default: "true"
+      wait_minutes:
+        description: How long to wait for the Kaggle session
+        default: "540"
+
+permissions:
+  contents: write
+
+jobs:
+  run:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 600
+    env:
+      KAGGLE_USERNAME: ${{ secrets.KAGGLE_USERNAME }}
+      KAGGLE_KEY: ${{ secrets.KAGGLE_KEY }}
+      KAGGLE_API_TOKEN: ${{ secrets.KAGGLE_API_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -q "kaggle>=1.7"
+      - name: Check credentials
+        run: |
+          [ -n "$KAGGLE_USERNAME" ] || { echo "::error::KAGGLE_USERNAME secret missing"; exit 1; }
+          [ -n "$KAGGLE_API_TOKEN$KAGGLE_KEY" ] || { echo "::error::KAGGLE_API_TOKEN (or KAGGLE_KEY) secret missing"; exit 1; }
+          [ -n "$KAGGLE_API_TOKEN" ] || unset KAGGLE_API_TOKEN
+          kaggle kernels list --mine --page-size 1 && echo "::notice title=kaggle::authenticated as $KAGGLE_USERNAME"
+      - name: Push the job to Kaggle
+        run: |
+          [ -n "$KAGGLE_API_TOKEN" ] || unset KAGGLE_API_TOKEN
+          job="${{ inputs.job }}"
+          slug="ci-$(echo "$job" | tr '_' '-')"
+          mkdir -p kjob
+          sed -e "s#__JOB__#$job#" -e "s#__REPO__#${{ github.repository }}#" -e "s#__REF__#${{ github.ref_name }}#" \
+            kaggle/bootstrap.py > kjob/run.py
+          cat > kjob/kernel-metadata.json <<JSON
+          {"id": "$KAGGLE_USERNAME/$slug", "title": "$slug", "code_file": "run.py", "language": "python",
+           "kernel_type": "script", "is_private": true, "enable_gpu": ${{ inputs.gpu }},
+           "enable_internet": true, "dataset_sources": [], "competition_sources": [], "kernel_sources": []}
+          JSON
+          kaggle kernels push -p kjob
+          echo "SLUG=$KAGGLE_USERNAME/$slug" >> "$GITHUB_ENV"
+      - name: Wait for the Kaggle session
+        run: |
+          [ -n "$KAGGLE_API_TOKEN" ] || unset KAGGLE_API_TOKEN
+          end=$(( $(date +%s) + ${{ inputs.wait_minutes }} * 60 ))
+          sleep 60
+          while :; do
+            st=$(kaggle kernels status "$SLUG" 2>&1 | tail -1)
+            echo "$(date -u +%H:%M) $st"
+            case "$st" in
+              *COMPLETE*|*complete*) break ;;
+              *ERROR*|*error*|*CANCEL*|*cancel*) echo "::error::$st"; break ;;
+            esac
+            [ "$(date +%s)" -lt "$end" ] || { echo "::error::timed out waiting"; break; }
+            sleep 60
+          done
+      - name: Download outputs
+        if: always()
+        run: |
+          [ -n "$KAGGLE_API_TOKEN" ] || unset KAGGLE_API_TOKEN
+          mkdir -p kout && kaggle kernels output "$SLUG" -p kout || true
+          ls -lR kout | head -50
+          tail -c 3000 kout/*.log 2>/dev/null | sed 's/^/LOG /' | tail -40 || true
+      - name: Publish outputs to a branch
+        if: always()
+        run: |
+          [ -d kout ] && [ -n "$(ls -A kout)" ] || exit 0
+          cd kout
+          git init -q -b "kaggle-out/${{ inputs.job }}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A && git commit -q -m "Outputs of ${{ inputs.job }} $(date -u +%Y-%m-%dT%H:%MZ)"
+          git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" "kaggle-out/${{ inputs.job }}"
+          echo "::notice title=outputs::published to branch kaggle-out/${{ inputs.job }}"

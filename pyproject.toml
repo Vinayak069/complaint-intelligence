@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "complaints"
+version = "0.1.0"
+description = "Complaint intelligence for credit-card servicing on CFPB complaints"
+requires-python = ">=3.10"
+dependencies = ["numpy", "pandas", "pyarrow", "duckdb", "scikit-learn", "lightgbm", "scipy", "matplotlib"]
+
+[project.optional-dependencies]
+nlp = ["torch", "transformers", "sentence-transformers"]
+test = ["pytest"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+complaints = ["sql/*.sql", "agent/*.md"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
