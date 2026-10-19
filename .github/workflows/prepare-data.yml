@@ -1,5 +1,5 @@
 name: Prepare data
-# Downloads the public CFPB complaint database and a small open sentence-embedding model, and
+# Downloads CFPB complaints (with narratives, from a pre-Aug-2026 mirror) and a small open sentence-embedding model, and
 # publishes them on the `data` branch so the analysis can run anywhere without re-downloading
 # several GB. Started by hand from the Actions tab.
 on:
@@ -18,15 +18,10 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install duckdb==1.5.6 huggingface_hub
-      - name: Download CFPB complaints
-        run: |
-          curl -fL --retry 3 -o complaints.csv.zip https://files.consumerfinance.gov/ccdb/complaints.csv.zip
-          unzip -o complaints.csv.zip && rm complaints.csv.zip && ls -l complaints.csv
       - name: Filter to credit-card complaints with narratives
         run: |
           set -o pipefail
-          head -c 600 complaints.csv
-          python scripts/prepare_cfpb.py complaints.csv out/cfpb 2>&1 | tee prep.log
+          python scripts/prepare_cfpb.py "hf://datasets/Mouwiya/cfpb-consumer-complaints/**/*.parquet" out/cfpb 2>&1 | tee prep.log
       - name: Download embedding model (all-MiniLM-L6-v2, Apache-2.0)
         run: |
           python - <<'PY'
@@ -40,7 +35,7 @@ jobs:
           cp prep.log out/
           cat > out/README.md <<'MD'
           Data for complaint-intelligence, produced by the Prepare data workflow.
-          - cfpb/: CFPB Consumer Complaint Database (public domain, consumerfinance.gov), credit-card complaints with a consumer narrative, partitioned by year and quarter.
+          - cfpb/: CFPB Consumer Complaint Database (consumerfinance.gov) via the Hugging Face mirror Mouwiya/cfpb-consumer-complaints; credit-card complaints with a consumer narrative, partitioned by year and quarter. CFPB stopped publishing narratives in August 2026.
           - models/all-MiniLM-L6-v2/: sentence-transformers/all-MiniLM-L6-v2 (Apache-2.0).
           MD
           cd out
@@ -52,4 +47,4 @@ jobs:
       - name: Summary
         if: always()
         run: |
-          while IFS= read -r line; do echo "::notice title=prep::$line"; done < <(grep -E "^(header|years|products|responses|top|files|Traceback|[A-Za-z_.]*(Error|Exception))" prep.log | cut -c1-3000)
+          while IFS= read -r line; do echo "::notice title=prep::$line"; done < <(grep -E "^(columns|years|products|responses|top|files|Traceback|[A-Za-z_.]*(Error|Exception))" prep.log | cut -c1-3000)

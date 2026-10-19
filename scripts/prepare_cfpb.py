@@ -1,71 +1,77 @@
-"""Filter the CFPB Consumer Complaint Database to credit-card complaints with a narrative.
+"""Filter CFPB consumer complaints to credit-card complaints that have a consumer narrative.
 
-Input: complaints.csv from https://files.consumerfinance.gov/ccdb/complaints.csv.zip (public domain).
+CFPB stopped publishing narratives in its public download in August 2026, so the narratives
+come from a Hugging Face mirror of the database taken before that (Mouwiya/cfpb-consumer-complaints,
+complaints through January 2026). Column names are normalised, so the official CSV export, when
+it carries narratives, works as input too.
+
 Output: Parquet files partitioned by year and quarter, each well under GitHub's 100 MB file limit.
 
+    python scripts/prepare_cfpb.py "hf://datasets/Mouwiya/cfpb-consumer-complaints/**/*.parquet" out_dir
     python scripts/prepare_cfpb.py complaints.csv out_dir
 """
-import csv
+import re
 import sys
 from pathlib import Path
 
 import duckdb
 
+FIELDS = {  # output name: normalised source name
+    "complaint_id": "complaint_id", "date_received": "date_received", "date_sent": "date_sent_to_company",
+    "product": "product", "sub_product": "sub_product", "issue": "issue", "sub_issue": "sub_issue",
+    "narrative": "consumer_complaint_narrative", "company_public_response": "company_public_response",
+    "company": "company", "state": "state", "zip": "zip_code", "tags": "tags", "submitted_via": "submitted_via",
+    "company_response": "company_response_to_consumer", "timely": "timely_response",
+}
 
-def main(csv_path: str, out_dir: str) -> None:
+
+def norm(name: str) -> str:
+    return re.sub(r"[^a-z0-9]+", "_", name.strip().lower()).strip("_")
+
+
+def main(source: str, out_dir: str) -> None:
     out = Path(out_dir)
     out.mkdir(parents=True, exist_ok=True)
     con = duckdb.connect()
-    with open(csv_path, newline="", encoding="utf-8-sig") as f:
-        header = next(csv.reader(f))
-    print("header", header)
-    norm = {h.strip().lower(): h for h in header}
+    if source.endswith(".csv"):
+        con.execute(f"""CREATE VIEW raw AS SELECT * FROM read_csv('{source}', header = true, all_varchar = true,
+                        quote = '"', escape = '"', max_line_size = 10000000)""")
+    else:
+        con.execute("INSTALL httpfs; LOAD httpfs;")
+        con.execute(f"CREATE VIEW raw AS SELECT * FROM read_parquet('{source}', union_by_name = true)")
+    cols = {norm(r[0]): r[0] for r in con.execute("DESCRIBE raw").fetchall()}
+    print("columns", list(cols))
+    missing = [v for v in FIELDS.values() if v not in cols]
+    if missing:
+        sys.exit(f"source lacks columns {missing}")
 
-    def col(name: str) -> str:
-        return '"' + norm[name.lower()].replace('"', '""') + '"'
+    def c(key: str) -> str:
+        return '"' + cols[FIELDS[key]] + '"'
 
     con.execute(f"""
         CREATE TABLE cc AS
-        SELECT
-            CAST({col("Complaint ID")} AS BIGINT)                 AS complaint_id,
-            CAST({col("Date received")} AS DATE)                  AS date_received,
-            CAST({col("Date sent to company")} AS DATE)           AS date_sent,
-            {col("Product")}                                      AS product,
-            {col("Sub-product")}                                  AS sub_product,
-            {col("Issue")}                                        AS issue,
-            {col("Sub-issue")}                                    AS sub_issue,
-            {col("Consumer complaint narrative")}                 AS narrative,
-            {col("Company public response")}                      AS company_public_response,
-            {col("Company")}                                      AS company,
-            {col("State")}                                        AS state,
-            {col("ZIP code")}                                     AS zip,
-            {col("Tags")}                                         AS tags,
-            {col("Submitted via")}                                AS submitted_via,
-            {col("Company response to consumer")}                 AS company_response,
-            {col("Timely response?")}                             AS timely,
-            {col("Consumer disputed?")}                           AS disputed
-        FROM read_csv('{csv_path}', header = true, all_varchar = true, quote = '"', escape = '"',
-                      max_line_size = 10000000)
-        WHERE {col("Product")} ILIKE '%credit card%'
-          AND {col("Consumer complaint narrative")} IS NOT NULL
-          AND length({col("Consumer complaint narrative")}) > 0
+        SELECT TRY_CAST({c('complaint_id')} AS BIGINT) AS complaint_id,
+               TRY_CAST({c('date_received')} AS DATE) AS date_received,
+               TRY_CAST({c('date_sent')} AS DATE) AS date_sent,
+               {', '.join(f'CAST({c(k)} AS VARCHAR) AS {k}' for k in FIELDS if k not in ('complaint_id', 'date_received', 'date_sent'))}
+        FROM raw
+        WHERE CAST({c('product')} AS VARCHAR) ILIKE '%credit card%'
+          AND {c('narrative')} IS NOT NULL AND length(trim(CAST({c('narrative')} AS VARCHAR))) > 0
     """)
+    con.execute("DELETE FROM cc WHERE complaint_id IN (SELECT complaint_id FROM cc GROUP BY 1 HAVING count(*) > 1)"
+                " AND rowid NOT IN (SELECT min(rowid) FROM cc GROUP BY complaint_id)")
     con.execute(f"""
         COPY (SELECT *, year(date_received) AS year, quarter(date_received) AS q FROM cc)
         TO '{out}' (FORMAT parquet, COMPRESSION zstd, PARTITION_BY (year, q), OVERWRITE_OR_IGNORE)
     """)
-    summary = con.execute("""
-        SELECT year(date_received) AS year, count(*) AS n,
+    print("years", con.execute("""
+        SELECT year(date_received), count(*),
                round(avg(CASE WHEN company_response IN ('Closed with monetary relief',
-                   'Closed with non-monetary relief', 'Closed with relief') THEN 1 ELSE 0 END), 3) AS relief_rate
-        FROM cc GROUP BY 1 ORDER BY 1
-    """).fetchall()
-    print("years", summary)
+                   'Closed with non-monetary relief', 'Closed with relief') THEN 1 ELSE 0 END), 3)
+        FROM cc GROUP BY 1 ORDER BY 1""").fetchall())
     print("products", con.execute("SELECT product, count(*) FROM cc GROUP BY 1 ORDER BY 2 DESC").fetchall())
-    print("responses", con.execute(
-        "SELECT company_response, count(*) FROM cc GROUP BY 1 ORDER BY 2 DESC").fetchall())
-    print("top companies", con.execute(
-        "SELECT company, count(*) FROM cc GROUP BY 1 ORDER BY 2 DESC LIMIT 12").fetchall())
+    print("responses", con.execute("SELECT company_response, count(*) FROM cc GROUP BY 1 ORDER BY 2 DESC").fetchall())
+    print("top companies", con.execute("SELECT company, count(*) FROM cc GROUP BY 1 ORDER BY 2 DESC LIMIT 12").fetchall())
     biggest = max(p.stat().st_size for p in out.rglob("*.parquet"))
     print("files", len(list(out.rglob("*.parquet"))), "largest bytes", biggest)
     if biggest > 90 * 2**20:
