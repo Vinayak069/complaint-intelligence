@@ -1,0 +1,6 @@
+columns ['date_received', 'product', 'sub_product', 'issue', 'sub_issue', 'consumer_complaint_narrative', 'company_public_response', 'company', 'state', 'zip_code', 'tags', 'submitted_via', 'date_sent_to_company', 'company_response_to_consumer', 'timely_response', 'complaint_id']
+years [(2015, 6243, 0.348), (2016, 9433, 0.343), (2017, 10960, 0.295), (2018, 11854, 0.296), (2019, 12526, 0.281), (2020, 17102, 0.277), (2021, 16607, 0.276), (2022, 21512, 0.318), (2023, 31353, 0.376), (2024, 35451, 0.364), (2025, 41526, 0.293), (2026, 14357, 0.261), (None, 2835, 0.332)]
+products [('Credit card', 123076), ('Credit card or prepaid card', 108683)]
+responses [('Closed with explanation', 158019), ('Closed with monetary relief', 41117), ('Closed with non-monetary relief', 32242), ('Untimely response', 182), ('Closed', 105), (None, 89), ('In progress', 5)]
+top companies [('CAPITAL ONE FINANCIAL CORPORATION', 28693), ('CITIBANK, N.A.', 28364), ('SYNCHRONY FINANCIAL', 20236), ('JPMORGAN CHASE & CO.', 19573), ('AMERICAN EXPRESS COMPANY', 15523), ('BANK OF AMERICA, NATIONAL ASSOCIATION', 15015), ('Bread Financial Holdings, Inc.', 10578), ('DISCOVER BANK', 8500), ('BARCLAYS BANK DELAWARE', 8070), ('WELLS FARGO & COMPANY', 7547), ('TRANSUNION INTERMEDIATE HOLDINGS, INC.', 5980), ('U.S. BANCORP', 5831)]
+files 47 largest bytes 4185226
