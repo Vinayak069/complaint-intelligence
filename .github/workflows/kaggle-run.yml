@@ -33,10 +33,17 @@ jobs:
       - run: pip install -q "kaggle>=1.7"
       - name: Check credentials
         run: |
-          [ -n "$KAGGLE_USERNAME" ] || { echo "::error::KAGGLE_USERNAME secret missing"; exit 1; }
+          echo "::notice title=secrets::username set: $([ -n "$KAGGLE_USERNAME" ] && echo yes || echo no), api token set: $([ -n "$KAGGLE_API_TOKEN" ] && echo yes || echo no), legacy key set: $([ -n "$KAGGLE_KEY" ] && echo yes || echo no)"
           [ -n "$KAGGLE_API_TOKEN$KAGGLE_KEY" ] || { echo "::error::KAGGLE_API_TOKEN (or KAGGLE_KEY) secret missing"; exit 1; }
           [ -n "$KAGGLE_API_TOKEN" ] || unset KAGGLE_API_TOKEN
-          kaggle kernels list --mine --page-size 1 && echo "::notice title=kaggle::authenticated as $KAGGLE_USERNAME"
+          [ -n "$KAGGLE_USERNAME" ] || unset KAGGLE_USERNAME
+          kaggle config view 2>&1 | sed 's/^/config: /' | grep -vi "key\|token" || true
+          if [ -z "$KAGGLE_USERNAME" ]; then
+            u=$(kaggle config view 2>/dev/null | sed -n 's/.*username: *//p' | head -1)
+            [ -n "$u" ] && [ "$u" != "None" ] || { echo "::error::KAGGLE_USERNAME secret missing and could not be read from the token"; exit 1; }
+            echo "KAGGLE_USERNAME=$u" >> "$GITHUB_ENV"
+          fi
+          kaggle kernels list --mine --page-size 1 && echo "::notice title=kaggle::authenticated"
       - name: Push the job to Kaggle
         run: |
           [ -n "$KAGGLE_API_TOKEN" ] || unset KAGGLE_API_TOKEN
