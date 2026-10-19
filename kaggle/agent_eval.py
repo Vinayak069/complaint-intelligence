@@ -1,5 +1,6 @@
-"""GPU job: evaluates the LLM triage agent on a random sample of test complaints, with and
-without its tools. Needs the outputs of kaggle/gpu_models.py (branch kaggle-out/gpu_models).
+"""GPU job: evaluates the LLM triage agent on a random sample of test complaints in three designs:
+no tools, tools with the LLM deciding everything, and guarded (tools, with the queue limited to the
+router's top three and priority set by the relief model). Needs the outputs of kaggle/gpu_models.py (branch kaggle-out/gpu_models).
 
 Outputs in --out: agent_eval.json (metrics) and agent_outputs.jsonl (every prompt's answer).
 """
@@ -29,7 +30,7 @@ def fetch_gpu_outputs(dest: Path) -> Path:
 
 
 @torch.no_grad()
-def generate(tok, llm, convs: list[list[dict]], bs: int = 16, max_new: int = 320) -> list[str]:
+def generate(tok, llm, convs: list[list[dict]], bs: int = 16, max_new: int = 400) -> list[str]:
     prompts = [tok.apply_chat_template(c, tokenize=False, add_generation_prompt=True) for c in convs]
     order = np.argsort([len(p) for p in prompts])
     out = [None] * len(prompts)
@@ -56,7 +57,10 @@ def main():
     df = data.load_features(f"{a.data}/cfpb/**/*.parquet")
     top = df[df.split == "train"]["company"].value_counts().index[:25].tolist()
     df = models.add_columns(df, top).reset_index(drop=True)
-    preds = pd.read_parquet(gpu / "transformer_preds.parquet").query("split == 'test'")
+    allp = pd.read_parquet(gpu / "transformer_preds.parquet")
+    preds = allp.query("split == 'test'")
+    # priority thresholds from the validation period: top 20% of relief scores high, next 30% medium
+    high, medium = allp.query("split == 'val'").relief_p.quantile([0.8, 0.5]).tolist()
     emb = pd.read_parquet(gpu / "embeddings.parquet").set_index("complaint_id")
     queues = sorted(c[2:] for c in preds.columns if c.startswith("q_"))
 
@@ -79,15 +83,25 @@ def main():
         np.mean([triage.tool_route(c)[0][0] == q for c, q in zip(cases, sample.queue)])),
         "sample_relief_rate": float(sample.relief.mean())}
     rows_out = []
-    for with_tools in (False, True):
-        name = "with_tools" if with_tools else "no_tools"
+    res["priority_thresholds"] = {"high": high, "medium": medium}
+    for name, with_tools, guarded in (("no_tools", False, False), ("with_tools", True, False),
+                                      ("guarded", True, True)):
         t = time.time()
-        raws = generate(tok, llm, [triage.messages(c, queues, with_tools) for c in cases])
-        rows = [{"complaint_id": c.complaint_id, "true_queue": q, "relief": int(rel),
-                 "provided": triage.provided_policies(c, with_tools), "raw": raw}
-                for c, q, rel, raw in zip(cases, sample.queue, sample.relief, raws)]
+        raws = generate(tok, llm, [triage.messages(c, queues, with_tools, guarded=guarded) for c in cases])
+        rows, flags = [], []
+        for c, q, rel, raw in zip(cases, sample.queue, sample.relief, raws):
+            row = {"complaint_id": c.complaint_id, "true_queue": q, "relief": int(rel),
+                   "provided": triage.provided_policies(c, with_tools), "raw": raw}
+            if guarded:
+                row["llm_raw"], (row["raw"], f) = raw, triage.guard(raw, c, high, medium)
+                flags.append(f)
+            rows.append(row)
         res[name] = triage.score(rows, queues)
         res[name]["seconds"] = time.time() - t
+        if guarded:
+            res[name]["queue_fallback_rate"] = float(np.mean([f["queue_fallback"] for f in flags]))
+            res[name]["parse_failed_rate"] = float(np.mean([f["parse_failed"] for f in flags]))
+            res[name]["escalated_rate"] = float(np.mean([f.get("escalated", False) for f in flags]))
         print(name, res[name], flush=True)
         rows_out += [{**r, "provided": sorted(r["provided"]), "condition": name} for r in rows]
 

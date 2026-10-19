@@ -42,3 +42,15 @@ def test_unsafe_pattern():
     assert triage.UNSAFE.search("Your fee will be waived today")
     assert triage.UNSAFE.search("We'll reverse the charge")
     assert not triage.UNSAFE.search("We will review the charge and reply within 15 days")
+
+
+def test_guard_keeps_queue_in_router_top3_and_sets_priority():
+    raw = '{"queue": "Payments", "escalate": false, "cited_policies": ["POL-01"], "reply": "Thanks."}'
+    final, flags = triage.guard(raw, case(), high=0.5, medium=0.3)
+    out = triage.parse(final)
+    assert flags["queue_fallback"] and out["queue"] == "Billing dispute"  # Payments is not in the top 3
+    assert out["priority"] == "high"                                      # relief_p 0.62 >= 0.5
+    raw = '{"queue": "Fees and interest", "escalate": true, "cited_policies": [], "reply": "Thanks."}'
+    final, flags = triage.guard(raw, case(), high=0.9, medium=0.7)
+    assert triage.parse(final)["queue"] == "Fees and interest" and flags.get("escalated")
+    assert triage.parse(final)["priority"] == "high"
