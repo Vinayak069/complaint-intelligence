@@ -1,0 +1,42 @@
+[
+  {
+    "complaint_id": 15782245,
+    "true_queue": "Escalated investigation",
+    "relief": 1,
+    "agent": {
+      "queue": "Escalated investigation",
+      "priority": "high",
+      "cited_policies": [
+        "POL-07",
+        "POL-11"
+      ],
+      "reply": "Thank you for bringing this important matter to our attention. Our credit reporting team is currently reviewing the late payment reported on your account. To assist with this review, please provide any statements, receipts, or correspondence with [REDACTED] that support your claim. We will respond within 15 days with the outcome of our investigation, and we will adhere to the Fair Credit Reporting Act guidelines. Please know that we take your concerns seriously and will ensure your account is accurately reflected."
+    }
+  },
+  {
+    "complaint_id": 15232564,
+    "true_queue": "Billing dispute",
+    "relief": 0,
+    "agent": {
+      "queue": "Billing dispute",
+      "priority": "medium",
+      "cited_policies": [
+        "POL-01"
+      ],
+      "reply": "Thank you for reaching out about the recent double charge of {$1500.00} on your account. Our billing disputes team is currently reviewing this issue. Please provide any receipts, order confirmations, or correspondence with [REDACTED] that you have. We will reach out to [REDACTED] to verify the legitimacy of the charge. We aim to provide a resolution within 15 days, and we will keep you updated. Thank you for your patience."
+    }
+  },
+  {
+    "complaint_id": 15774676,
+    "true_queue": "Card usage",
+    "relief": 0,
+    "agent": {
+      "queue": "Card usage",
+      "priority": "high",
+      "cited_policies": [
+        "POL-12"
+      ],
+      "reply": "Thank you for reaching out about the issues you're facing with your Capital One account. Our Identity Theft Review Team is looking into your case right away. Please send any relevant documents such as your FTC report, driver\u2019s license confirmation, and any correspondence with Capital One or the university. We will provide a written update within 15 days, and we will ensure your situation is addressed appropriately. Thank you for your patience."
+    }
+  }
+]

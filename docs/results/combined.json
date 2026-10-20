@@ -1,0 +1,115 @@
+{
+  "lightgbm": {
+    "auc": 0.7529472487048157,
+    "avg_precision": 0.5343256402874859,
+    "brier": 0.176051754817293,
+    "base_rate": 0.2853014037985136,
+    "relief_captured_top20pct": 0.39866607940602783,
+    "precision_top20pct": 0.5687101696436585,
+    "lift_top20pct": 1.993366180719162
+  },
+  "lightgbm_embeddings": {
+    "auc": 0.7538682867669048,
+    "avg_precision": 0.5371469865808405,
+    "brier": 0.1752257230587143,
+    "base_rate": 0.2853014037985136,
+    "relief_captured_top20pct": 0.3984143962750897,
+    "precision_top20pct": 0.5683511354456512,
+    "lift_top20pct": 1.9921077424737588,
+    "importance": {
+      "text_svd (all)": 0.37908883698308465,
+      "embeddings (all)": 0.21089546014138555,
+      "company_prior_relief_rate": 0.11128000818072493,
+      "company_top": 0.10968353091945662,
+      "sub_issue": 0.08899196264712785,
+      "state": 0.054605769318997584,
+      "company_prior_n": 0.02368892927400392,
+      "issue": 0.009276168794124268,
+      "max_amount": 0.005234198830885323,
+      "text_len": 0.0025346531968608054,
+      "month_of_year": 0.002051429500920554,
+      "n_amounts": 0.0014384067853701525,
+      "n_redactions": 0.001090559438569311,
+      "tags": 0.00012715442331859213,
+      "sub_product": 1.2931565169885964e-05
+    }
+  },
+  "transformer": {
+    "auc": 0.7189903484943246,
+    "avg_precision": 0.5017108369198846,
+    "brier": 0.18454933166503906,
+    "base_rate": 0.2853014037985136,
+    "relief_captured_top20pct": 0.37557415214245266,
+    "precision_top20pct": 0.5357687819764833,
+    "lift_top20pct": 1.8779044717033901
+  },
+  "stacked": {
+    "auc": 0.754658719913886,
+    "avg_precision": 0.538631711582514,
+    "brier": 0.17425578973190534,
+    "base_rate": 0.2853014037985136,
+    "relief_captured_top20pct": 0.3996728119297804,
+    "precision_top20pct": 0.570146306435688,
+    "lift_top20pct": 1.9983999337007763,
+    "inputs": [
+      "lightgbm_embeddings",
+      "transformer"
+    ],
+    "weights": [
+      0.8981897569209348,
+      0.07270647043567348
+    ]
+  },
+  "routing_logreg": {
+    "accuracy": 0.6881125911032923,
+    "macro_f1": 0.6287806998525045,
+    "per_queue_f1": {
+      "Account closure": 0.6424652737247578,
+      "Applications": 0.7347255647853428,
+      "Billing dispute": 0.8591272206987004,
+      "Card usage": 0.5637842465753424,
+      "Credit reporting": 0.6010303377218088,
+      "Escalated investigation": 0.5606469002695418,
+      "Fees and interest": 0.720446392985253,
+      "Other": 0.4811217410355656,
+      "Payments": 0.5414418832761158,
+      "Rewards and offers": 0.5830174374526156
+    },
+    "top2_accuracy": 0.8415610526693713
+  },
+  "routing_transformer": {
+    "accuracy": 0.6899795354180878,
+    "macro_f1": 0.6068524099955923,
+    "per_queue_f1": {
+      "Account closure": 0.6915422885572139,
+      "Applications": 0.7655407969639468,
+      "Billing dispute": 0.8785149451958599,
+      "Card usage": 0.6234375,
+      "Credit reporting": 0.40923326760236634,
+      "Escalated investigation": 0.2918552036199095,
+      "Fees and interest": 0.7472629144178874,
+      "Other": 0.5245309678938692,
+      "Payments": 0.5736255286428297,
+      "Rewards and offers": 0.5629806870620406
+    },
+    "top2_accuracy": 0.8626000789861056
+  },
+  "routing_ensemble": {
+    "accuracy": 0.7108210964707572,
+    "macro_f1": 0.6476629045986191,
+    "per_queue_f1": {
+      "Account closure": 0.6937744084539398,
+      "Applications": 0.7658469528028105,
+      "Billing dispute": 0.8814235219479774,
+      "Card usage": 0.6367820692415449,
+      "Credit reporting": 0.5112709832134292,
+      "Escalated investigation": 0.5261576971214017,
+      "Fees and interest": 0.7533131829807022,
+      "Other": 0.5294391797421159,
+      "Payments": 0.5765652501885844,
+      "Rewards and offers": 0.6020558002936858
+    },
+    "top2_accuracy": 0.8664416759415503,
+    "transformer_weight": 0.5
+  }
+}
