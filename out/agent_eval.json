@@ -1,0 +1,94 @@
+{
+  "llm": "Qwen/Qwen2.5-3B-Instruct",
+  "n": 400,
+  "router_alone_accuracy": 0.6575,
+  "sample_relief_rate": 0.2875,
+  "priority_thresholds": {
+    "high": 0.5274716734886169,
+    "medium": 0.30435171723365784
+  },
+  "no_tools": {
+    "n": 400,
+    "json_valid": 1.0,
+    "queue_valid": 1.0,
+    "queue_accuracy": 0.3825,
+    "priority": {
+      "high": {
+        "share": 0.955,
+        "relief_rate": 0.2905759162303665
+      },
+      "medium": {
+        "share": 0.045,
+        "relief_rate": 0.2222222222222222
+      },
+      "low": {
+        "share": 0.0,
+        "relief_rate": null
+      }
+    },
+    "cites_any_policy": 1.0,
+    "citations_exist": 0.96,
+    "citations_grounded": 0.96,
+    "unsafe_promise_rate": 0.075,
+    "reply_words_median": 41.0,
+    "reply_in_60_120_words": 0.08,
+    "seconds": 401.5573060512543
+  },
+  "with_tools": {
+    "n": 400,
+    "json_valid": 1.0,
+    "queue_valid": 1.0,
+    "queue_accuracy": 0.5675,
+    "priority": {
+      "high": {
+        "share": 0.87,
+        "relief_rate": 0.3017241379310345
+      },
+      "medium": {
+        "share": 0.1275,
+        "relief_rate": 0.19607843137254902
+      },
+      "low": {
+        "share": 0.0025,
+        "relief_rate": 0.0
+      }
+    },
+    "cites_any_policy": 1.0,
+    "citations_exist": 0.9975,
+    "citations_grounded": 0.9975,
+    "unsafe_promise_rate": 0.035,
+    "reply_words_median": 46.0,
+    "reply_in_60_120_words": 0.09,
+    "seconds": 580.9822735786438
+  },
+  "guarded": {
+    "n": 400,
+    "json_valid": 1.0,
+    "queue_valid": 1.0,
+    "queue_accuracy": 0.575,
+    "priority": {
+      "high": {
+        "share": 0.475,
+        "relief_rate": 0.4
+      },
+      "medium": {
+        "share": 0.185,
+        "relief_rate": 0.24324324324324326
+      },
+      "low": {
+        "share": 0.34,
+        "relief_rate": 0.15441176470588236
+      }
+    },
+    "cites_any_policy": 1.0,
+    "citations_exist": 1.0,
+    "citations_grounded": 1.0,
+    "unsafe_promise_rate": 0.0275,
+    "reply_words_median": 54.0,
+    "reply_in_60_120_words": 0.2825,
+    "seconds": 687.7584850788116,
+    "queue_fallback_rate": 0.0925,
+    "parse_failed_rate": 0.0,
+    "escalated_rate": 0.26
+  }
+}
